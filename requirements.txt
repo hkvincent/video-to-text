@@ -1,0 +1,4 @@
+
+pydub==0.25.1
+google-cloud-speech==2.9.0
+openai==0.27.0
