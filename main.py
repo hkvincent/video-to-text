@@ -1,8 +1,12 @@
+import json
 import subprocess
 import threading
 import tkinter as tk
 from tkinter import filedialog, ttk
 import os
+
+import requests
+
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -33,7 +37,8 @@ class Application(tk.Frame):
         self.button = tk.Button(self.lower_left_frame, text="Choose", command=self.choose_video)
         self.button.pack(side="left")
 
-        self.table = ttk.Treeview(self.upper_left_frame, columns=('Video Path', 'Audio Path', 'Text Path'), show='headings')
+        self.table = ttk.Treeview(self.upper_left_frame, columns=('Video Path', 'Audio Path', 'Text Path'),
+                                  show='headings')
 
         self.table.heading('Video Path', text='Video Path')
         self.table.heading('Audio Path', text='Audio Path')
@@ -104,12 +109,45 @@ class Application(tk.Frame):
         thread.start()
 
     def summary(self):
-        # Generate summary
-        pass
+        # Get the path to the text file
+        text_path = self.table.item(self.table.get_children()[0], 'values')[2]
+        # Read the text file
+        with open(text_path, 'r') as file:
+            text = file.read()
+
+        # Define the API endpoint
+        url = ""
+
+        # Define the headers for the API request
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": ""
+        }
+
+        # Define the data for the API request
+        data = {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "please help me summary below text: ````" + text
+                }
+            ],
+            "max_tokens": 100  # Adjust as needed
+        }
+
+        # Make the API request
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+
+        # Parse the response
+        summary = response.json()['choices'][0]['message']["content"]
+
+        # Print the summary
+        print(summary)
 
     def delete_row(self):
         selected_item = self.table.selection()[0]  # get selected item
         self.table.delete(selected_item)
+
 
 root = tk.Tk()
 app = Application(master=root)
